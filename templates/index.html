@@ -13,10 +13,10 @@
 <body>
     <h1>Welcome to Actor Finder</h1>
     <h3>A project by Mason Myre</h3>
-    <p>Have you ever been talking with a friend and realize you don't know that actor's name, only to say "oh yeah it was that one guy, who played in those two movies" well I haven't because I don't have friends so hopefully you find this more useful than I do!</p>
+    <p>Have you ever been talking with a friend and realize you don't know that actor's name, only to say "oh yeah it was that one guy, who played in those two movies" well now you can look up two+ movies and see all of the actors who were in those movies</p>
     <p>How does it work?</p>
     <p>I'm glad you asked! Simply input the titles of two movies and you will receive all of the actors who were in both of those movies.</p>
-    <p>I am still working on the functionality to add multiple movies in the same search but I don't really know what I am doing when it comes to html so it might take a while.</p>
+    <p>You can also add more than two movies!</p>
     <form id="movieForm" action="/" method="post">
         <div id="movieFields">
             <div class="movie-input">
@@ -29,6 +29,7 @@
             </div>
         </div>
         <button type="button" id="addMovieButton">Add Another Movie</button>
+        <button type="button" id="removeMovieButton">Remove Bottom Movie</button>
         <br><br>
         <button type="submit">Submit</button>
     </form>
@@ -47,6 +48,15 @@
             `;
             movieFields.appendChild(newMovieDiv);
         });
+
+        document.getElementById('removeMovieButton').addEventListener('click', function() {
+            if (movieCount > 2) { // Ensure at least two fields remain
+                const movieFields = document.getElementById('movieFields');
+                movieFields.removeChild(movieFields.lastElementChild);
+                movieCount--;
+            }
+        });
+
 
         document.getElementById('movieForm').onsubmit = function(event) {
             const inputs = document.querySelectorAll('input[name="movie"]');

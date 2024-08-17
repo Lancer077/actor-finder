@@ -6,16 +6,23 @@
     <title>Actors</title>
 </head>
 <body>
-    <h1>Actors Found:</h1>
+    <h1>Actors found in every movie: </h1>
     <ul>
         {% for actor in actor_list %}
             <li>{{ actor }}</li>
         {% endfor %}
     </ul>
 
+    <h2>Actors in found in majority of movies: </h2>
+    <ul>
+        {% for actor in actor_list_2 %}
+            <li>{{ actor }}</li>
+        {% endfor %}
+    </ul>
+
     <button id="backButton">Go back</button>
 
-    <p>Unfortunately, I am a backend programmer and my 15 minutes of attempting to make this back button work were in vain. Web browsers give you a back button for a reason. I am that reason.</p>
+    <p>Unfortunately, I am a backend programmer and my 15 minutes of attempting to make this back button work were in vain. Web browsers give you a back button for a reason.</p>
 
     <script>
 
