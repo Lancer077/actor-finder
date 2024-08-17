@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enter Movie Titles</title>
+    <style>
+        .movie-input {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to Actor Finder</h1>
+    <h3>A project by Mason Myre</h3>
+    <p>Have you ever been talking with a friend and realize you don't know that actor's name, only to say "oh yeah it was that one guy, who played in those two movies" well I haven't because I don't have friends so hopefully you find this more useful than I do!</p>
+    <p>How does it work?</p>
+    <p>I'm glad you asked! Simply input the titles of two movies and you will receive all of the actors who were in both of those movies.</p>
+    <p>I am still working on the functionality to add multiple movies in the same search but I don't really know what I am doing when it comes to html so it might take a while.</p>
+    <form id="movieForm" action="/" method="post">
+        <div id="movieFields">
+            <div class="movie-input">
+                <label for="movie1">Movie Title 1:</label>
+                <input type="text" id="movie1" name="movie" required>
+            </div>
+            <div class="movie-input">
+                <label for="movie2">Movie Title 2:</label>
+                <input type="text" id="movie2" name="movie" required>
+            </div>
+        </div>
+        <button type="button" id="addMovieButton">Add Another Movie</button>
+        <br><br>
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        let movieCount = 2; // Start counting from 2 since we have two fields initially
+
+        document.getElementById('addMovieButton').addEventListener('click', function() {
+            movieCount++;
+            const movieFields = document.getElementById('movieFields');
+            const newMovieDiv = document.createElement('div');
+            newMovieDiv.className = 'movie-input';
+            newMovieDiv.innerHTML = `
+                <label for="movie${movieCount}">Movie Title ${movieCount}:</label>
+                <input type="text" id="movie${movieCount}" name="movie" required>
+            `;
+            movieFields.appendChild(newMovieDiv);
+        });
+
+        document.getElementById('movieForm').onsubmit = function(event) {
+            const inputs = document.querySelectorAll('input[name="movie"]');
+            let allFilled = true;
+
+            inputs.forEach(input => {
+                if (input.value.trim() === "") {
+                    allFilled = false;
+                }
+            });
+
+            if (!allFilled) {
+                event.preventDefault(); // Prevent form submission if any input is empty
+                alert("Please enter all movie titles.");
+            }
+        };
+    </script>
+</body>
+</html>
