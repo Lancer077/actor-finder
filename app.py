@@ -5,37 +5,30 @@ from bs4 import BeautifulSoup
 app = Flask(__name__)
 
 
+#web scraping part of the project
 
-#WEB SCRAPING --------------------------------------------------
-#aka the reason I started this project
-
-#takes in movie title and returns url for the cast list of the movie
+#takes the movie title and returns the url for the movie cast list
 def get_movie_url(title):
-    #title.replace("spiderman", "spider man") #spiderman doesn't work without the hyphen or a space
-    #title.replace("Spiderman", "spider man")
-
-    api_key = "" #It's only a matter of time before I accidentally leak this lmao
+    api_key = "5cb75ca6" #oh no I'm leaking the api key that anyone can get for free
+    #I certainly couldn't get a new one even if there was a problem with this one
     search_url = f"http://www.omdbapi.com/?t={title}&apikey={api_key}" #search the movie title using the api key
-    #the actual IMDB website blocks bot activity for searches but does not block bots from accessing the cast list
 
-    response = requests.get(search_url) #grab the response
+    response = requests.get(search_url)
 
     if response.status_code != 200:
-        print("Problem retrieving the data")
+        print("Problem grabbing the movie ID from the title, it is likely that the movie title is spelled incorrectly")
         return None
-
-    data = response.json() #parse data
+    
+    data = response.json()
 
     if data['Response'] == 'False':
         print("Movie Not Found")
         return None
-
+    
     imdb_id = data['imdbID']
     movie_url = f"https://www.imdb.com/title/{imdb_id}/fullcredits" #grab the movie cast url
     return movie_url
 
-
-#takes in a movie cast url and returns a list of the actor names
 def get_cast(movie_url):
     response = requests.get(movie_url) #accesses the cast website url
 
@@ -45,6 +38,10 @@ def get_cast(movie_url):
 
     cast_section = soup.find('table', {'class': 'cast_list'}) #grab the table
 
+    if cast_section == None: #error handling
+        print("throwing error under get_cast")
+        return redirect(url_for('error'))
+
     actors = cast_section.find_all('a', {'href': lambda x: x and x.startswith('/name/')}) #stackoverflow moment
 
     actor_names = [actor.get_text(strip=True) for actor in actors] #create the list of actor names
@@ -52,83 +49,79 @@ def get_cast(movie_url):
     return actor_names
 
 
-#get all cast members in both films
-def get_cast_union(cast1, cast2):
-    set1 = set(cast1)
-    set2 = set(cast2)
-
-    set3 = set1.intersection(set2)
-
-    cast3 = []
-
-    for name in set3:
-        if(name != ""):
-            cast3.append(name)
-
-    return cast3
-
 def driver_logic(movies):
-    num_of_movies = len(movies)
-
-    cast_URLs = []
-
-    for movie in movies:
-        cast_URLs.append(get_movie_url(movie))
     
+    num_of_movies = len(movies) #grab how many movies the user input
+    cast_URLs = [] #the list of the urls for the movie casts
+
+    #get the movie urls
+    for movie in movies:
+        curUrl = get_movie_url(movie)
+        if curUrl == None:
+            print("throwing error under driver logic getting movie cast URLs")
+            return "error"
+        cast_URLs.append(curUrl)
+    
+    #set up a list to store all of the cast lists
     cast_lists = []
+    #cast_lists -> cast_list -> cast_member
     for url in cast_URLs:
         cast_lists.append(get_cast(url))
-
+    
+    #throw every name into a dictionary, increment if we already have that name in the dictionary
+    #at the end, if the increments is equal to num_of_movies, then that person had to have been in all given movies
     big_cast_list = dict()
 
     for cast_list in cast_lists:
         for cast_member in cast_list:
-            if cast_member in big_cast_list: #if cast member was found and was already in the list
-                big_cast_list[cast_member] = big_cast_list[cast_member] + 1 #increment the number of times that cast member was found
-                
-            else: #if cast member was not already in the list
-                big_cast_list[cast_member] = 1 #add the cast member to the list with one movie to their name
-                # I could make it so that if a cast member was not found in the first movie, they are just disregarded but eventually I want to allow for 3 movies to be entered
-                #   and the website would show people who only show up in 2 of the 3 movies
+            if cast_member in big_cast_list: #if already found, just increment
+                big_cast_list[cast_member] = big_cast_list[cast_member] + 1
+            else:
+                big_cast_list[cast_member] = 1
     
     final_cast_list = []
 
-    names = big_cast_list.keys()
+    names = big_cast_list.keys() #grab the names
 
-    for name in names:
+    for name in names: #loop through the names
         if big_cast_list[name] == num_of_movies:
             final_cast_list.append(name)
 
-
     return final_cast_list
-    
-   
-    
-
-
-#website flask stuff (aka the part of this project I don't like) ----------------------------------
 
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        # Get all movie titles from the form
+        #get all movie titles
         movie_titles = request.form.getlist('movie')
-        #perform the driver logic on the movies
+        #perform driver logic
         actor_list = driver_logic(movie_titles)
 
+        if actor_list == "error":
+            return redirect(url_for('error'))
 
         return redirect(url_for('actors', actors=','.join(actor_list)))
-
     return render_template('index.html')
 
 @app.route('/actors')
 def actors():
-    # actor names
+    #names
     actors = request.args.get('actors', '')
-    # Split the actors back into a list
+    #split actors back into a list
     actor_list = actors.split(',')
-    return render_template('actors.html', actor_list=actor_list)
+    return render_template('actors.html',actor_list=actor_list)
+
+@app.route('/error')
+def error():
+    return render_template('error.html')
+
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+

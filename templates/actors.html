@@ -13,16 +13,11 @@
         {% endfor %}
     </ul>
 
-    <button id="backButton">Go back</button>
-
-    <p>Unfortunately, I am a backend programmer and my 15 minutes of attempting to make this back button work were in vain. Web browsers give you a back button for a reason. I am that reason.</p>
+    <button id="go-back">Go back</button>
 
     <script>
-
-        document.getElementByID('backButton').addEventListener('click', function(){
-            window.location.href = '{{ url_for("index") }}';
-        });
-
+        document.getElementById("go-back").addEventListener("click", () => {history.back();});
+        
     </script>
 </body>
 </html>
